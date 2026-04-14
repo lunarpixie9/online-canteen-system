@@ -14,10 +14,17 @@ const S = {
     maxWidth: 980,
     margin: "0 auto",
     padding: "0 16px",
-    height: 56,
+    paddingTop: 10,
+    paddingBottom: 10,
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+  },
+  topRow: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: 12,
   },
   logo: {
     display: "flex",
@@ -57,6 +64,7 @@ const S = {
     background: "var(--bg-sunken)",
     borderRadius: 9999,
     padding: "3px",
+    justifyContent: "center",
   },
 };
 
@@ -73,47 +81,23 @@ const inactiveStyle = {
 export default function Navbar() {
   const appMode = useStore((s) => s.appMode);
   const setAppMode = useStore((s) => s.setAppMode);
-  const tabs = appMode === "admin"
-    ? [
-        { to: "/",       label: "Menu" },
-        { to: "/students", label: "Students" },
-        { to: "/orders", label: "Orders" },
-      ]
-    : [
-        { to: "/",         label: "Menu" },
-        { to: "/orders",   label: "Orders" },
-        { to: "/spending", label: "Purchases" },
-      ];
 
   return (
     <header style={S.header}>
       <div style={S.inner}>
-        <NavLink to="/" style={S.logo}>
-          <p style={S.logoText}>Online Canteen</p>
-        </NavLink>
+        <div style={S.topRow}>
+          <NavLink to="/" style={S.logo}>
+            <p style={S.logoText}>Online Canteen</p>
+          </NavLink>
 
-        {/* Nav tabs */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: "var(--text-muted)",
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              userSelect: "none",
-            }}
-          >
-            Mode
-          </span>
           <button
             type="button"
             onClick={() => setAppMode(appMode === "admin" ? "student" : "admin")}
             style={{
-              border: "1px solid var(--border)",
-              background: "var(--bg-card)",
-              color: "var(--text-strong)",
-              padding: "6px 10px",
+              border: "1px solid rgba(0,0,0,0.06)",
+              background: "#7A5040",
+              color: "#fff",
+              padding: "7px 12px",
               borderRadius: 9999,
               fontSize: 12,
               fontWeight: 700,
@@ -125,27 +109,6 @@ export default function Navbar() {
           >
             {appMode === "admin" ? "Admin" : "Student"}
           </button>
-
-          <nav style={S.nav}>
-          {tabs.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end
-              style={({ isActive }) => ({
-                padding: "6px 14px",
-                borderRadius: 9999,
-                fontSize: 13,
-                fontWeight: 500,
-                textDecoration: "none",
-                transition: "all 0.15s",
-                ...(isActive ? activeStyle : inactiveStyle),
-              })}
-            >
-              {label}
-            </NavLink>
-          ))}
-          </nav>
         </div>
       </div>
     </header>
