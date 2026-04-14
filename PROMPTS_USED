@@ -1,0 +1,41 @@
+# PROMPTS_USED.md
+ 
+## AI Tools Used
+ 
+1. **Claude (Anthropic)** — claude.ai — used as a coding assistant for implementation
+2. **Antigravity** — used for UI feedback and design refinement
+ 
+---
+ 
+## How I Used AI
+ 
+I planned the architecture, data model, and component structure myself before writing any code. AI was used selectively — to speed up implementation of patterns I already understood, validate my decisions, and catch edge cases I might have missed. Every piece of code was reviewed, understood, and in several cases rewritten by me before being integrated.
+ 
+---
+ 
+## Prompts Used
+ 
+### 1. Validating Tech Stack Decisions
+> "I've decided to use Zustand over Redux for this canteen dashboard because the state is simple: just snacks, students, and orders. Redux would add unnecessary boilerplate. React Query for loading/error states, React Hook Form + Zod for validation. Does this stack make sense for a prototype of this scale, or am I over-engineering it?"
+ 
+I had already chosen the stack. This was a sanity check. Claude confirmed the reasoning and flagged that React Query's `staleTime: 0` would be important since data comes from an in-memory store, not a real API — something I then handled explicitly in `App.jsx`.
+ 
+### 2. localStorage Edge Case Handling
+> "In my Zustand store, I'm reading orders from localStorage on init and writing back on every mutation. What can go wrong here — storage quota, corrupted JSON, private browsing mode — and what's the minimal safe way to handle it without over-engineering?"
+ 
+I had already written the basic read/write logic. This prompt was specifically about failure modes. The response confirmed my try/catch approach and clarified that failing silently (not crashing the app) was the right call for a prototype, since localStorage errors are environmental, not logic errors.
+ 
+### 3. Reusable OrderForm in Two Contexts
+> "I have an OrderForm that needs to work in two places — from the Snacks page where the student selector should be visible, and from the Student Detail page where the student is already known and the selector should be locked. I'm thinking of passing a preselectedStudentId prop and disabling the field. Is there a cleaner pattern or is this fine?"
+ 
+My design, I just wanted a second opinion on the prop pattern. The response confirmed the approach was idiomatic React and suggested using the `disabled` attribute on the select rather than conditionally rendering it — which I implemented because it keeps the form layout consistent across both contexts.
+ 
+### 4. React Query + Zustand Data Flow
+> "My setup has Zustand as the source of truth and React Query wrapping store reads with fake delays to simulate API behaviour. After a mutation, I'm calling queryClient.invalidateQueries() to trigger a re-fetch. But since the data source is Zustand (not a real API), will the re-fetch actually pick up the updated state or will it return stale closure data?"
+ 
+This was a genuine concern I had about the architecture. The response explained that since the query functions close over Zustand selectors, and Zustand updates are synchronous, the re-fetch would always read the latest state — confirming the pattern was sound.
+ 
+### 5. Form Validation — Name Field Rules
+> "For the create student form, I'm validating name with Zod. I want minimum 2 characters, maximum 50, and only letters and spaces — no numbers or special characters since this is a school system. Is this regex sufficient: /^[a-zA-Z\s]+$/ or does it have edge cases I'm missing?"
+ 
+I had written the schema already. This was about the regex specifically. The response pointed out that `\s` also matches newlines and tabs, which I hadn't considered. I kept the regex as-is since a student name realistically won't contain those, but I was aware of the trade-off.
