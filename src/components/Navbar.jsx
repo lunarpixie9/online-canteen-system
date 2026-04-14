@@ -72,19 +72,18 @@ export default function Navbar() {
   return (
     <header style={S.header}>
       <div style={S.inner}>
-        {/* Logo */}
-        <a href="/" style={S.logo}>
-          <div style={S.logoMark}>
+        <NavLink to="/" style={S.logo}>
+          <div style={S.logoMark} aria-hidden="true">
             {/* Simple tray icon */}
             <svg viewBox="0 0 16 16" style={S.logoMarkSvg}>
-              <path d="M2 10h12v1.5a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 11.5V10zm0-1C2 6.686 4.686 4 8 4s6 2.686 6 5H2z"/>
+              <path d="M2 10h12v1.5a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 11.5V10zm0-1C2 6.686 4.686 4 8 4s6 2.686 6 5H2z" />
             </svg>
           </div>
           <div>
             <p style={S.logoText}>Edzy Canteen</p>
             <p style={S.logoSub}>Admin Dashboard</p>
           </div>
-        </a>
+        </NavLink>
 
         {/* Nav tabs */}
         <nav style={S.nav}>
