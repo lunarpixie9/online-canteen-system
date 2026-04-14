@@ -1,22 +1,47 @@
-import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useStore } from "../store/useStore";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { api } from "../api/mockApi";
+
+const orderSchema = z.object({
+  snackId: z.string().min(1, "Please select a snack."),
+  quantity: z.number().int().min(1).max(5),
+});
 
 export default function OrderForm({ studentId, onSuccess }) {
-  const { snacks, placeOrder } = useStore();
-  const [snackId, setSnackId] = useState("");
-  const [qty, setQty] = useState(1);
-  const [error, setError] = useState("");
+  const { snacks } = useStore();
+  const queryClient = useQueryClient();
 
+  const placeOrder = useMutation({
+    mutationFn: ({ snackId, quantity }) => api.createOrder({ studentId, snackId, quantity }),
+    onSuccess: (order) => {
+      queryClient.invalidateQueries({ queryKey: ["orders", studentId] });
+      queryClient.invalidateQueries({ queryKey: ["student", studentId] });
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+      onSuccess?.(order);
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(orderSchema),
+    defaultValues: { snackId: "", quantity: 1 },
+  });
+
+  const snackId = watch("snackId");
+  const qty = watch("quantity");
   const selected = snacks.find((s) => s.id === snackId);
 
-  function submit(e) {
-    e.preventDefault();
-    setError("");
-    if (!snackId) { setError("Please select a snack."); return; }
-    const result = placeOrder({ studentId, snackId, quantity: qty });
-    if (result.success) onSuccess?.(result.order);
-    else setError(result.error);
-  }
+  const submit = handleSubmit(async (values) => {
+    await placeOrder.mutateAsync(values);
+  });
 
   return (
     <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -25,7 +50,7 @@ export default function OrderForm({ studentId, onSuccess }) {
         <label className="label">Snack</label>
         <select
           value={snackId}
-          onChange={e => { setSnackId(e.target.value); setError(""); }}
+          onChange={e => setValue("snackId", e.target.value)}
           className="input-field"
           style={{ appearance: "none" }}
         >
@@ -34,18 +59,19 @@ export default function OrderForm({ studentId, onSuccess }) {
             <option key={s.id} value={s.id}>{s.name} — ₹{s.price}</option>
           ))}
         </select>
+        {errors.snackId && <p style={{ fontSize: 12, color: "var(--red)", marginTop: 5 }}>{errors.snackId.message}</p>}
       </div>
 
       {/* Quantity */}
       <div>
         <label className="label">Quantity</label>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <button type="button" onClick={() => setQty(q => Math.max(1, q - 1))}
+          <button type="button" onClick={() => setValue("quantity", Math.max(1, qty - 1))}
             style={{ width: 38, height: 38, borderRadius: 9999, border: "1.5px solid var(--border)", background: "var(--bg-sunken)", cursor: "pointer", fontSize: 18, color: "var(--text-strong)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             −
           </button>
           <span style={{ fontFamily: "Fraunces, serif", fontSize: 24, fontWeight: 500, color: "var(--text-strong)", width: 28, textAlign: "center" }}>{qty}</span>
-          <button type="button" onClick={() => setQty(q => Math.min(5, q + 1))}
+          <button type="button" onClick={() => setValue("quantity", Math.min(5, qty + 1))}
             style={{ width: 38, height: 38, borderRadius: 9999, border: "1.5px solid var(--border)", background: "var(--bg-sunken)", cursor: "pointer", fontSize: 18, color: "var(--text-strong)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             +
           </button>
@@ -61,9 +87,9 @@ export default function OrderForm({ studentId, onSuccess }) {
         </div>
       )}
 
-      {error && <p style={{ fontSize: 12, color: "var(--red)", marginTop: -8 }}>{error}</p>}
+      {placeOrder.isError && <p style={{ fontSize: 12, color: "var(--red)", marginTop: -8 }}>{String(placeOrder.error?.message || "Failed to place order.")}</p>}
 
-      <button type="submit" className="btn-primary" style={{ width: "100%", padding: "13px" }}>
+      <button type="submit" className="btn-primary" style={{ width: "100%", padding: "13px" }} disabled={isSubmitting}>
         Place Order
       </button>
     </form>

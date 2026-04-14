@@ -1,30 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
-import { useStore } from "../store/useStore";
+import { api } from "../api/mockApi";
 
 export function useSnacks() {
-  const snacks = useStore(s => s.snacks);
-  return useQuery({ queryKey: ["snacks"], queryFn: () => snacks, initialData: snacks });
+  return useQuery({ queryKey: ["snacks"], queryFn: () => api.getSnacks() });
 }
 
 export function useStudents() {
-  const students = useStore(s => s.students);
-  return useQuery({ queryKey: ["students"], queryFn: () => students, initialData: students });
+  return useQuery({ queryKey: ["students"], queryFn: () => api.getStudents() });
 }
 
 export function useStudent(id) {
-  const getStudentById = useStore(s => s.getStudentById);
   return useQuery({
     queryKey: ["student", id],
-    queryFn: () => getStudentById(id) ?? null,
+    queryFn: () => api.getStudent(id),
     enabled: !!id,
   });
 }
 
 export function useStudentOrders(studentId) {
-  const getOrdersByStudentId = useStore(s => s.getOrdersByStudentId);
   return useQuery({
     queryKey: ["orders", studentId],
-    queryFn: () => getOrdersByStudentId(studentId),
+    queryFn: () => api.getOrdersByStudentId(studentId),
     enabled: !!studentId,
   });
 }

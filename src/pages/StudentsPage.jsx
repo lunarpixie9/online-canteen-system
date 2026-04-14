@@ -1,19 +1,24 @@
 import { useState } from "react";
 import { useStudents } from "../hooks/useApi";
-import { useStore } from "../store/useStore";
 import { useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import StudentListItem from "../components/StudentListItem";
 import Modal from "../components/Modal";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { api } from "../api/mockApi";
+
+const createStudentSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters."),
+});
 
 export default function StudentsPage() {
   const { data: students = [], isLoading } = useStudents();
-  const { addStudent } = useStore();
   const queryClient = useQueryClient();
 
   const [query, setQuery]         = useState("");
   const [showCreate, setShowCreate] = useState(false);
-  const [newName, setNewName]     = useState("");
-  const [createError, setCreateError] = useState("");
   const [toast, setToast]         = useState(null);
 
   const filtered = students.filter(s =>
@@ -22,19 +27,30 @@ export default function StudentsPage() {
 
   const totalSpent = students.reduce((sum, s) => sum + s.totalSpent, 0);
 
-  function handleCreate() {
-    const trimmed = newName.trim();
-    if (trimmed.length < 2) { setCreateError("Name must be at least 2 characters."); return; }
-    const student = addStudent(trimmed);
-    if (student) {
-      queryClient.invalidateQueries(["students"]);
+  const createStudent = useMutation({
+    mutationFn: ({ name }) => api.createStudent({ name }),
+    onSuccess: (student) => {
+      queryClient.invalidateQueries({ queryKey: ["students"] });
       setShowCreate(false);
-      setNewName("");
-      setCreateError("");
+      reset({ name: "" });
       setToast(`${student.name} added`);
       setTimeout(() => setToast(null), 2500);
-    }
-  }
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(createStudentSchema),
+    defaultValues: { name: "" },
+  });
+
+  const onCreate = handleSubmit(async (values) => {
+    await createStudent.mutateAsync({ name: values.name });
+  });
 
   return (
     <div className="page-container">
@@ -108,28 +124,31 @@ export default function StudentsPage() {
       </div>
 
       {/* Create modal */}
-      <Modal isOpen={showCreate} onClose={() => { setShowCreate(false); setNewName(""); setCreateError(""); }} title="Add Student">
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <Modal isOpen={showCreate} onClose={() => { setShowCreate(false); reset({ name: "" }); }} title="Add Student">
+        <form onSubmit={onCreate} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
             <label className="label">Full Name</label>
             <input
               type="text"
               className="input-field"
               placeholder="e.g. Rewa Bisht"
-              value={newName}
-              onChange={e => { setNewName(e.target.value); setCreateError(""); }}
-              onKeyDown={e => e.key === "Enter" && handleCreate()}
+              {...register("name")}
               autoFocus
             />
-            {createError && <p style={{ fontSize: 12, color: "var(--red)", marginTop: 5 }}>{createError}</p>}
+            {errors.name && <p style={{ fontSize: 12, color: "var(--red)", marginTop: 5 }}>{errors.name.message}</p>}
+            {createStudent.isError && (
+              <p style={{ fontSize: 12, color: "var(--red)", marginTop: 5 }}>
+                {String(createStudent.error?.message || "Failed to create student.")}
+              </p>
+            )}
           </div>
           <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: -4 }}>
             A unique referral code will be generated automatically.
           </p>
-          <button className="btn-primary" style={{ width: "100%", padding: 13 }} onClick={handleCreate}>
+          <button className="btn-primary" style={{ width: "100%", padding: 13 }} type="submit" disabled={isSubmitting}>
             Create Student
           </button>
-        </div>
+        </form>
       </Modal>
 
       {/* Toast */}

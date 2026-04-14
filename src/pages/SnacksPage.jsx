@@ -1,8 +1,13 @@
 import { useState } from "react";
-import { useSnacks } from "../hooks/useApi";
+import { useSnacks, useStudents } from "../hooks/useApi";
 import { useStore } from "../store/useStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SnackCard from "../components/SnackCard";
 import Modal from "../components/Modal";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { api } from "../api/mockApi";
 
 const CATEGORIES = ["All", "Snack", "Breakfast", "Drink", "Meal"];
 
@@ -10,20 +15,44 @@ function getGreeting() {
   return "Good Morning Rewa!";
 }
 
-function QuickOrderBody({ snack, onSuccess }) {
-  const { placeOrder, currentStudentId } = useStore();
-  const [qty, setQty] = useState(1);
-  const [error, setError] = useState("");
+const quickOrderSchema = z.object({
+  studentId: z.string().min(1, "Please select a student."),
+  quantity: z.number().int().min(1).max(5),
+});
 
-  function submit() {
-    if (!currentStudentId) { setError("No student selected."); return; }
-    const result = placeOrder({ studentId: currentStudentId, snackId: snack.id, quantity: qty });
-    if (result.success) onSuccess(result.order);
-    else setError(result.error);
-  }
+function QuickOrderBody({ snack, onSuccess }) {
+  const { data: students = [] } = useStudents();
+  const queryClient = useQueryClient();
+  const { currentStudentId } = useStore();
+
+  const placeOrder = useMutation({
+    mutationFn: ({ studentId, snackId, quantity }) => api.createOrder({ studentId, snackId, quantity }),
+    onSuccess: (order) => {
+      queryClient.invalidateQueries({ queryKey: ["orders", order.studentId] });
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+      onSuccess(order);
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(quickOrderSchema),
+    defaultValues: { studentId: currentStudentId ?? "", quantity: 1 },
+  });
+
+  const qty = watch("quantity");
+
+  const submit = handleSubmit(async (values) => {
+    await placeOrder.mutateAsync({ studentId: values.studentId, snackId: snack.id, quantity: values.quantity });
+  });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+    <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       {/* Snack summary */}
       <div style={{ background: "var(--bg-sunken)", borderRadius: 12, padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
@@ -33,29 +62,48 @@ function QuickOrderBody({ snack, onSuccess }) {
         <span style={{ fontFamily: "Fraunces, serif", fontSize: 18, fontWeight: 500, color: "var(--text-strong)" }}>₹{snack.price * qty}</span>
       </div>
 
+      {/* Student */}
+      <div>
+        <label className="label">Student</label>
+        <select
+          className="input-field"
+          style={{ appearance: "none" }}
+          {...register("studentId")}
+        >
+          <option value="">— select student —</option>
+          {students.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+        {errors.studentId && <p style={{ fontSize: 12, color: "var(--red)", marginTop: 5 }}>{errors.studentId.message}</p>}
+      </div>
+
       {/* Qty */}
       <div>
         <label className="label">Quantity</label>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <button type="button" onClick={() => setQty(q => Math.max(1, q - 1))}
+          <button type="button" onClick={() => setValue("quantity", Math.max(1, qty - 1))}
             style={{ width: 38, height: 38, borderRadius: 9999, border: "1.5px solid var(--border)", background: "var(--bg-sunken)", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
           <span style={{ fontFamily: "Fraunces, serif", fontSize: 24, fontWeight: 500, color: "var(--text-strong)", width: 28, textAlign: "center" }}>{qty}</span>
-          <button type="button" onClick={() => setQty(q => Math.min(5, q + 1))}
+          <button type="button" onClick={() => setValue("quantity", Math.min(5, qty + 1))}
             style={{ width: 38, height: 38, borderRadius: 9999, border: "1.5px solid var(--border)", background: "var(--bg-sunken)", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
         </div>
       </div>
 
-      {error && <p style={{ fontSize: 12, color: "var(--red)", marginTop: -8 }}>{error}</p>}
+      {placeOrder.isError && <p style={{ fontSize: 12, color: "var(--red)", marginTop: -8 }}>{String(placeOrder.error?.message || "Failed to place order.")}</p>}
 
-      <button className="btn-primary" style={{ width: "100%", padding: 13 }} onClick={submit}>
+      <button className="btn-primary" style={{ width: "100%", padding: 13 }} type="submit" disabled={isSubmitting}>
         Confirm Order
       </button>
-    </div>
+    </form>
   );
 }
 
 export default function SnacksPage() {
   const { data: snacks = [], isLoading } = useSnacks();
+  const appMode = useStore((s) => s.appMode);
   const [category, setCategory] = useState("All");
   const [orderSnack, setOrderSnack] = useState(null);
   const [toast, setToast] = useState(null);
@@ -71,11 +119,13 @@ export default function SnacksPage() {
   return (
     <div className="page-container">
       {/* Greeting */}
-      <div className="anim-fadeUp" style={{ marginBottom: 24 }}>
-        <p style={{ fontSize: 16, color: "var(--text-muted)", fontWeight: 500, marginBottom: 4 }}>{getGreeting()}</p>
-        <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 500, color: "var(--text-strong)", lineHeight: 1.2 }}>
-          What would you like to have today?
-        </h1>
+      <div className="anim-fadeUp" style={{ marginBottom: 24, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+        <div>
+          <p style={{ fontSize: 16, color: "var(--text-muted)", fontWeight: 500, marginBottom: 4 }}>{getGreeting()}</p>
+          <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 500, color: "var(--text-strong)", lineHeight: 1.2 }}>
+            {appMode === "admin" ? "Manage all orders and items!" : "What would you like to have today?"}
+          </h1>
+        </div>
       </div>
 
       {/* Category chips */}

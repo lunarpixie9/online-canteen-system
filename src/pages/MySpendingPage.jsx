@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useStore } from "../store/useStore";
 
 function formatDayKey(d) {
@@ -8,80 +8,161 @@ function formatDayKey(d) {
   return `${y}-${m}-${day}`;
 }
 
+function formatMonthKey(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  return `${y}-${m}`;
+}
+
 function formatShortDayLabel(dayKey) {
   const [y, m, d] = dayKey.split("-").map(Number);
   return new Date(y, m - 1, d).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
+
+function formatMonthLabel(monthKey) {
+  const [y, m] = monthKey.split("-").map(Number);
+  const d = new Date(y, m - 1, 1);
+  const mon = d.toLocaleDateString("en-IN", { month: "short" });
+  return `${y} ${mon}`;
+}
+
+function daysInMonth(year, monthIndex0) {
+  return new Date(year, monthIndex0 + 1, 0).getDate();
+}
+
+function formatTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
 }
 
 export default function MySpendingPage() {
   const { currentStudentId, getStudentById, getOrdersByStudentId } = useStore();
   const student = currentStudentId ? getStudentById(currentStudentId) : null;
 
-  const { total, daily } = useMemo(() => {
-    const year = new Date().getFullYear();
-    const orders = currentStudentId ? getOrdersByStudentId(currentStudentId) : [];
-    const map = new Map();
-    let totalSpent = 0;
-
-    for (const o of orders) {
-      const d = new Date(o.createdAt);
-      if (Number.isNaN(d.getTime()) || d.getFullYear() !== year) continue;
-      const key = formatDayKey(d);
-      const next = (map.get(key) || 0) + (o.payableAmount || 0);
-      map.set(key, next);
-      totalSpent += o.payableAmount || 0;
-    }
-
-    const rows = [...map.entries()]
-      .sort((a, b) => (a[0] < b[0] ? 1 : -1))
-      .map(([dayKey, amount]) => ({ dayKey, amount }));
-
-    return { total: totalSpent, daily: rows, year };
-  }, [currentStudentId, getOrdersByStudentId]);
+  const ordersAll = useMemo(
+    () => (currentStudentId ? getOrdersByStudentId(currentStudentId) : []),
+    [currentStudentId, getOrdersByStudentId]
+  );
 
   const today = new Date();
-  const monthLabel = today.toLocaleDateString("en-IN", { month: "short" });
-  const yearLabel = String(today.getFullYear());
-  const max = daily.length ? Math.max(...daily.map((r) => r.amount)) : 0;
+  const currentYear = today.getFullYear();
+  const years = useMemo(() => {
+    const out = [];
+    for (let y = currentYear; y >= 2019; y--) out.push(y);
+    return out;
+  }, [currentYear]);
+
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1); // 1..12
+
+  const selectedMonthKey = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+
+  const dayKeysInMonth = useMemo(() => {
+    const count = daysInMonth(selectedYear, selectedMonth - 1);
+    const keys = [];
+    for (let d = 1; d <= count; d++) {
+      keys.push(`${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(d).padStart(2, "0")}`);
+    }
+    return keys;
+  }, [selectedYear, selectedMonth]);
+
+  const [selectedDayKey, setSelectedDayKey] = useState(() => formatDayKey(today));
+
+  const effectiveSelectedDayKey = useMemo(() => {
+    if (dayKeysInMonth.includes(selectedDayKey)) return selectedDayKey;
+    return dayKeysInMonth[0] ?? "";
+  }, [dayKeysInMonth, selectedDayKey]);
+
+  const purchasesForDay = useMemo(() => {
+    if (!effectiveSelectedDayKey) return [];
+    return [...ordersAll]
+      .filter((o) => {
+        const d = new Date(o.createdAt);
+        if (Number.isNaN(d.getTime())) return false;
+        return formatDayKey(d) === effectiveSelectedDayKey;
+      })
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  }, [ordersAll, effectiveSelectedDayKey]);
 
   return (
     <div className="page-container">
       <div className="anim-fadeUp" style={{ marginBottom: 18 }}>
-        <p style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600, marginBottom: 4 }}>
-          {student ? `Spending · ${student.name}` : "Spending"}
-        </p>
         <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 26, fontWeight: 500, color: "var(--text-strong)", lineHeight: 1.2 }}>
-          {yearLabel} {monthLabel}
+          Track your purchases
         </h1>
       </div>
 
-      <div className="card anim-fadeUp d1" style={{ padding: 16, marginBottom: 14 }}>
-        <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
-          Per-day spending track (this year)
-        </p>
+      {/* Purchases by date */}
+      <div className="card anim-fadeUp d2" style={{ padding: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 12 }}>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            className="input-field"
+            style={{ padding: "8px 10px", appearance: "none" }}
+          >
+            {years.map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
 
-        {daily.length === 0 ? (
-          <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
-            No spending recorded this year yet.
-          </p>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {daily.map((r) => {
-              const pct = max ? Math.max(0.08, r.amount / max) : 0;
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            className="input-field"
+            style={{ padding: "8px 10px", appearance: "none" }}
+          >
+            {Array.from({ length: 12 }).map((_, idx) => {
+              const m = idx + 1;
+              const label = new Date(2000, idx, 1).toLocaleDateString("en-IN", { month: "short" });
               return (
-                <div key={r.dayKey} style={{ display: "grid", gridTemplateColumns: "72px 1fr auto", gap: 10, alignItems: "center" }}>
-                  <span style={{ fontSize: 12, color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
-                    {formatShortDayLabel(r.dayKey)}
-                  </span>
-                  <div style={{ height: 10, background: "var(--bg-sunken)", borderRadius: 9999, overflow: "hidden" }}>
-                    <div style={{ width: `${pct * 100}%`, height: "100%", background: "var(--amber)", borderRadius: 9999 }} />
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-strong)", fontVariantNumeric: "tabular-nums" }}>
-                    ₹{r.amount}
-                  </span>
-                </div>
+                <option key={m} value={m}>
+                  {label}
+                </option>
               );
             })}
+          </select>
+
+          <select
+            value={effectiveSelectedDayKey}
+            onChange={(e) => setSelectedDayKey(e.target.value)}
+            className="input-field"
+            style={{ padding: "8px 10px", appearance: "none" }}
+          >
+            {dayKeysInMonth.map((k) => (
+              <option key={k} value={k}>
+                {formatShortDayLabel(k)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {effectiveSelectedDayKey && purchasesForDay.length === 0 ? (
+          <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+            No purchases on this date.
+          </p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {purchasesForDay.map((o, i) => (
+              <div key={o.id}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "10px 0" }}>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text-strong)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {o.snackName}
+                    </p>
+                    <p style={{ fontSize: 11, color: "var(--text-muted)", margin: 0, marginTop: 2 }}>
+                      {formatTime(o.createdAt)} · qty {o.quantity} · {o.status}
+                    </p>
+                  </div>
+                  <span style={{ fontFamily: "Fraunces, serif", fontSize: 14, fontWeight: 500, color: "var(--text-strong)", flexShrink: 0 }}>
+                    ₹{o.payableAmount}
+                  </span>
+                </div>
+                {i < purchasesForDay.length - 1 && <div className="divider" />}
+              </div>
+            ))}
           </div>
         )}
       </div>

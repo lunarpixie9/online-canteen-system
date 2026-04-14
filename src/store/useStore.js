@@ -2,6 +2,24 @@ import { create } from "zustand";
 import { INITIAL_SNACKS, INITIAL_STUDENTS, INITIAL_ORDERS } from "../data/mockData";
 
 const STORAGE_KEY = "edzy_orders";
+const MODE_KEY = "canteen_mode";
+
+function loadMode() {
+  try {
+    const raw = localStorage.getItem(MODE_KEY);
+    return raw === "admin" ? "admin" : "student";
+  } catch {
+    return "student";
+  }
+}
+
+function saveMode(mode) {
+  try {
+    localStorage.setItem(MODE_KEY, mode);
+  } catch {
+    // ignore
+  }
+}
 
 function startOfTodayMs() {
   const d = new Date();
@@ -56,10 +74,18 @@ function generateId(prefix) {
 }
 
 export const useStore = create((set, get) => ({
+  appMode: loadMode(), // "student" | "admin"
   snacks: INITIAL_SNACKS,
   students: INITIAL_STUDENTS,
   orders: loadOrdersFromStorage(),
   currentStudentId: INITIAL_STUDENTS?.[0]?.id ?? null,
+
+  setAppMode: (mode) =>
+    set(() => {
+      const next = mode === "admin" ? "admin" : "student";
+      saveMode(next);
+      return { appMode: next };
+    }),
 
   setCurrentStudentId: (id) => set(() => ({ currentStudentId: id })),
 

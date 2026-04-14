@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useStore } from "../store/useStore";
 
 const S = {
   header: {
@@ -70,6 +71,20 @@ const inactiveStyle = {
 };
 
 export default function Navbar() {
+  const appMode = useStore((s) => s.appMode);
+  const setAppMode = useStore((s) => s.setAppMode);
+  const tabs = appMode === "admin"
+    ? [
+        { to: "/",       label: "Menu" },
+        { to: "/students", label: "Students" },
+        { to: "/orders", label: "Orders" },
+      ]
+    : [
+        { to: "/",         label: "Menu" },
+        { to: "/orders",   label: "Orders" },
+        { to: "/spending", label: "Purchases" },
+      ];
+
   return (
     <header style={S.header}>
       <div style={S.inner}>
@@ -78,12 +93,41 @@ export default function Navbar() {
         </NavLink>
 
         {/* Nav tabs */}
-        <nav style={S.nav}>
-          {[
-            { to: "/",         label: "Menu" },
-            { to: "/orders",   label: "My Orders" },
-            { to: "/spending", label: "My Spending" },
-          ].map(({ to, label }) => (
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: "var(--text-muted)",
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              userSelect: "none",
+            }}
+          >
+            Mode
+          </span>
+          <button
+            type="button"
+            onClick={() => setAppMode(appMode === "admin" ? "student" : "admin")}
+            style={{
+              border: "1px solid var(--border)",
+              background: "var(--bg-card)",
+              color: "var(--text-strong)",
+              padding: "6px 10px",
+              borderRadius: 9999,
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
+            aria-label={`Switch to ${appMode === "admin" ? "student" : "admin"} mode`}
+            title={`Switch to ${appMode === "admin" ? "student" : "admin"} mode`}
+          >
+            {appMode === "admin" ? "Admin" : "Student"}
+          </button>
+
+          <nav style={S.nav}>
+          {tabs.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
@@ -101,7 +145,8 @@ export default function Navbar() {
               {label}
             </NavLink>
           ))}
-        </nav>
+          </nav>
+        </div>
       </div>
     </header>
   );
