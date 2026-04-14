@@ -9,7 +9,8 @@
  
 ## How I Used AI
  
-I planned the architecture, data model, and component structure myself before writing any code. AI was used selectively — to speed up implementation of patterns I already understood, validate my decisions, and catch edge cases I might have missed. Every piece of code was reviewed, understood, and in several cases rewritten by me before being integrated.
+I planned the architecture, data model, and component structure myself before 
+writing any code. AI was used selectively — to speed up implementation of patterns I already understood, validate my decisions, and catch edge cases I might have missed. Every piece of code was reviewed, understood, and in several cases rewritten by me before being integrated.
  
 ---
  
