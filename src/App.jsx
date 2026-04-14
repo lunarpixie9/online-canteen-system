@@ -2,8 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Navbar from "./components/Navbar";
 import SnacksPage from "./pages/SnacksPage";
-import StudentsPage from "./pages/StudentsPage";
-import StudentDetailPage from "./pages/StudentDetailPage";
+import MyOrdersPage from "./pages/MyOrdersPage";
+import MySpendingPage from "./pages/MySpendingPage";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 0, retry: 1 } },
@@ -32,8 +32,8 @@ export default function App() {
         <main>
           <Routes>
             <Route path="/"            element={<SnacksPage />} />
-            <Route path="/students"    element={<StudentsPage />} />
-            <Route path="/students/:id" element={<StudentDetailPage />} />
+            <Route path="/orders"      element={<MyOrdersPage />} />
+            <Route path="/spending"    element={<MySpendingPage />} />
             <Route path="/404"         element={<NotFoundPage />} />
             <Route path="*"            element={<Navigate to="/404" replace />} />
           </Routes>

@@ -40,6 +40,7 @@ const S = {
     fontWeight: 600,
     color: "var(--text-strong)",
     lineHeight: 1,
+    margin: 0,
   },
   logoSub: {
     fontSize: 9,
@@ -73,17 +74,15 @@ export default function Navbar() {
     <header style={S.header}>
       <div style={S.inner}>
         <NavLink to="/" style={S.logo}>
-          <div>
-            <p style={S.logoText}>Online Canteen</p>
-            <p style={S.logoSub}>Admin Dashboard</p>
-          </div>
+          <p style={S.logoText}>Online Canteen</p>
         </NavLink>
 
         {/* Nav tabs */}
         <nav style={S.nav}>
           {[
             { to: "/",         label: "Menu" },
-            { to: "/students", label: "Students" },
+            { to: "/orders",   label: "My Orders" },
+            { to: "/spending", label: "My Spending" },
           ].map(({ to, label }) => (
             <NavLink
               key={to}

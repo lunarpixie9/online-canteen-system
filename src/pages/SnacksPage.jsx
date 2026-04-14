@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSnacks, useStudents } from "../hooks/useApi";
+import { useSnacks } from "../hooks/useApi";
 import { useStore } from "../store/useStore";
 import SnackCard from "../components/SnackCard";
 import Modal from "../components/Modal";
@@ -7,19 +7,17 @@ import Modal from "../components/Modal";
 const CATEGORIES = ["All", "Snack", "Breakfast", "Drink", "Meal"];
 
 function getGreeting() {
-  return "Good Morning!";
+  return "Good Morning Rewa!";
 }
 
 function QuickOrderBody({ snack, onSuccess }) {
-  const { data: students = [] } = useStudents();
-  const { placeOrder } = useStore();
-  const [studentId, setStudentId] = useState("");
+  const { placeOrder, currentStudentId } = useStore();
   const [qty, setQty] = useState(1);
   const [error, setError] = useState("");
 
   function submit() {
-    if (!studentId) { setError("Select a student."); return; }
-    const result = placeOrder({ studentId, snackId: snack.id, quantity: qty });
+    if (!currentStudentId) { setError("No student selected."); return; }
+    const result = placeOrder({ studentId: currentStudentId, snackId: snack.id, quantity: qty });
     if (result.success) onSuccess(result.order);
     else setError(result.error);
   }
@@ -33,15 +31,6 @@ function QuickOrderBody({ snack, onSuccess }) {
           <p style={{ fontSize: 12, color: "var(--text-muted)", margin: 0, marginTop: 2 }}>₹{snack.price} each</p>
         </div>
         <span style={{ fontFamily: "Fraunces, serif", fontSize: 18, fontWeight: 500, color: "var(--text-strong)" }}>₹{snack.price * qty}</span>
-      </div>
-
-      {/* Student */}
-      <div>
-        <label className="label">Student</label>
-        <select value={studentId} onChange={e => { setStudentId(e.target.value); setError(""); }} className="input-field" style={{ appearance: "none" }}>
-          <option value="">— select student —</option>
-          {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
       </div>
 
       {/* Qty */}

@@ -34,15 +34,33 @@ function SpendingBars({ orders }) {
     <div className="card" style={{ padding: "18px 16px 16px" }}>
       <p style={{ fontFamily: "Fraunces, serif", fontSize: 15, fontWeight: 500, color: "var(--text-strong)", marginBottom: 3 }}>Top Items</p>
       <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 20 }}>Spending by item</p>
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-around", gap: 8, height: 100 }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+        gap: 12,
+        alignItems: "end",
+      }}>
         {top.map(([name, amount], i) => {
-          const h = Math.max((amount / max) * 80, 10);
+          const chartHeight = 88;
+          const h = Math.max((amount / max) * chartHeight, 10);
           return (
-            <div key={name} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flex: 1 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: BAR_COLORS[i] }}>₹{amount}</span>
-              <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "flex-end", height: 80 }}>
+            <div
+              key={name}
+              style={{
+                display: "grid",
+                gridTemplateRows: "16px 96px auto",
+                alignItems: "end",
+                justifyItems: "center",
+                rowGap: 8,
+                minWidth: 0,
+              }}
+            >
+              <span style={{ fontSize: 11, fontWeight: 600, color: BAR_COLORS[i], fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+                ₹{amount}
+              </span>
+              <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "flex-end", height: 96 }}>
                 <div style={{
-                  width: 28,
+                  width: "clamp(18px, 6vw, 28px)",
                   height: h,
                   borderRadius: 9999,
                   background: BAR_COLORS[i],
@@ -50,7 +68,20 @@ function SpendingBars({ orders }) {
                   animation: `barGrow 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 0.1}s both`,
                 }} />
               </div>
-              <span style={{ fontSize: 10, color: "var(--text-muted)", textAlign: "center", lineHeight: 1.3, maxWidth: 52, wordBreak: "break-word" }}>{name}</span>
+              <span style={{
+                fontSize: 10,
+                color: "var(--text-muted)",
+                textAlign: "center",
+                lineHeight: 1.25,
+                maxWidth: "100%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+              }}>
+                {name}
+              </span>
             </div>
           );
         })}
