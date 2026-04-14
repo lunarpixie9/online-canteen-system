@@ -61,7 +61,7 @@ When an order is placed: the order is added, the snack ordersCount increments, t
  
 ---
  
-## 📁 Project Structure
+##  Project Structure
  
 ```
 src/
@@ -76,7 +76,7 @@ src/
  
 ---
  
-## 🔒 Security Notes
+##  Security Notes
  
 All inputs validated with Zod. localStorage reads wrapped in try/catch. In production, this dashboard would require authentication and role-based access control.
  
