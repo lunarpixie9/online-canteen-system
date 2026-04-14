@@ -30,18 +30,28 @@ export default function SnackCard({ snack, onOrder }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        overflow: "hidden",
       }}>
-        {/* Category initial as tasteful monogram */}
-        <span style={{
-          fontFamily: "Fraunces, serif",
-          fontSize: 28,
-          color: cat.dot,
-          fontWeight: 400,
-          opacity: 0.7,
-          userSelect: "none",
-        }}>
-          {snack.name.charAt(0)}
-        </span>
+        {snack.imageUrl ? (
+          <img
+            src={snack.imageUrl}
+            alt={snack.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            loading="lazy"
+          />
+        ) : (
+          // fallback monogram (in case an image is missing)
+          <span style={{
+            fontFamily: "Fraunces, serif",
+            fontSize: 28,
+            color: cat.dot,
+            fontWeight: 400,
+            opacity: 0.7,
+            userSelect: "none",
+          }}>
+            {snack.name.charAt(0)}
+          </span>
+        )}
       </div>
 
       {/* Name */}

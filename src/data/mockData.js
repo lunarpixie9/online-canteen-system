@@ -1,19 +1,35 @@
+import biryaniNonvegImg from "../assets/food/biryani_nonveg.jpg";
+import breadPakoraImg from "../assets/food/bread_pakora.jpg";
+import chaasImg from "../assets/food/chaas.jpg";
+import coffeeImg from "../assets/food/coffee.jpg";
+import dalImg from "../assets/food/dal.jpg";
+import maggiImg from "../assets/food/maggi.jpg";
+import mangoLassiImg from "../assets/food/mango_lassi.jpg";
+import matarPaneerImg from "../assets/food/matar_paneer.jpg";
+import oreoImg from "../assets/food/oreo.jpg";
+import pohaImg from "../assets/food/poha.jpg";
+import rajmaImg from "../assets/food/rajma.jpg";
+import samosaImg from "../assets/food/samosa.jpg";
+import sandwichImg from "../assets/food/sandwich.jpg";
+import teaImg from "../assets/food/tea.jpg";
+import tikkaImg from "../assets/food/tikka.jpg";
+
 export const INITIAL_SNACKS = [
-    { id: "s1", name: "Samosa", price: 20, ordersCount: 142, category: "Snack" },
-    { id: "s2", name: "Veg Sandwich", price: 50, ordersCount: 98, category: "Breakfast" },
-    { id: "s3", name: "Mango Lassi", price: 20, ordersCount: 210, category: "Drink" },
-    { id: "s4", name: "Poha", price: 50, ordersCount: 75, category: "Breakfast" },
-    { id: "s5", name: "Bread Pakora", price: 30, ordersCount: 133, category: "Snack" },
-    { id: "s6", name: "Chaas", price: 20, ordersCount: 88, category: "Drink" },
-    { id: "s7", name: "Veg Maggi", price: 25, ordersCount: 195, category: "Snack" },
-    { id: "s8", name: "Oreo", price: 10, ordersCount: 301, category: "Snack" },
-    { id: "s9", name: "Rajma Rice", price: 80, ordersCount: 88, category: "Meal" },
-    { id: "s10", name: "Paneer Tikka", price: 100, ordersCount: 100, category: "Meal" },
-    { id: "s11", name: "Dal Rice", price: 80, ordersCount: 100, category: "Meal" },
-    { id: "s12", name: "Matar Paneer Rice", price: 80, ordersCount: 100, category: "Meal" },
-    { id: "s13", name: "Ginger Tea", price: 20, ordersCount: 100, category: "Drink" },
-    { id: "s14", name: "Chicken Biryani", price: 100, ordersCount: 100, category: "Meal" },
-    { id: "s15", name: "Coffee", price: 20, ordersCount: 100, category: "Drink" },
+    { id: "s1", name: "Samosa", price: 20, ordersCount: 142, category: "Snack", imageUrl: samosaImg },
+    { id: "s2", name: "Veg Sandwich", price: 50, ordersCount: 98, category: "Breakfast", imageUrl: sandwichImg },
+    { id: "s3", name: "Mango Lassi", price: 20, ordersCount: 210, category: "Drink", imageUrl: mangoLassiImg },
+    { id: "s4", name: "Poha", price: 50, ordersCount: 75, category: "Breakfast", imageUrl: pohaImg },
+    { id: "s5", name: "Bread Pakora", price: 30, ordersCount: 133, category: "Snack", imageUrl: breadPakoraImg },
+    { id: "s6", name: "Chaas", price: 20, ordersCount: 88, category: "Drink", imageUrl: chaasImg },
+    { id: "s7", name: "Veg Maggi", price: 25, ordersCount: 195, category: "Snack", imageUrl: maggiImg },
+    { id: "s8", name: "Oreo", price: 10, ordersCount: 301, category: "Snack", imageUrl: oreoImg },
+    { id: "s9", name: "Rajma Rice", price: 80, ordersCount: 88, category: "Meal", imageUrl: rajmaImg },
+    { id: "s10", name: "Paneer Tikka", price: 100, ordersCount: 100, category: "Meal", imageUrl: tikkaImg },
+    { id: "s11", name: "Dal Rice", price: 80, ordersCount: 100, category: "Meal", imageUrl: dalImg },
+    { id: "s12", name: "Matar Paneer Rice", price: 80, ordersCount: 100, category: "Meal", imageUrl: matarPaneerImg },
+    { id: "s13", name: "Ginger Tea", price: 20, ordersCount: 100, category: "Drink", imageUrl: teaImg },
+    { id: "s14", name: "Chicken Biryani", price: 100, ordersCount: 100, category: "Meal", imageUrl: biryaniNonvegImg },
+    { id: "s15", name: "Coffee", price: 20, ordersCount: 100, category: "Drink", imageUrl: coffeeImg },
   ];
   
   export const INITIAL_STUDENTS = [

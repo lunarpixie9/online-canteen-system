@@ -7,10 +7,7 @@ import Modal from "../components/Modal";
 const CATEGORIES = ["All", "Snack", "Breakfast", "Drink", "Meal"];
 
 function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
+  return "Good Morning!";
 }
 
 function QuickOrderBody({ snack, onSuccess }) {
@@ -21,7 +18,7 @@ function QuickOrderBody({ snack, onSuccess }) {
   const [error, setError] = useState("");
 
   function submit() {
-    if (!studentId) { setError("Please select a student."); return; }
+    if (!studentId) { setError("Select a student."); return; }
     const result = placeOrder({ studentId, snackId: snack.id, quantity: qty });
     if (result.success) onSuccess(result.order);
     else setError(result.error);
@@ -86,8 +83,10 @@ export default function SnacksPage() {
     <div className="page-container">
       {/* Greeting */}
       <div className="anim-fadeUp" style={{ marginBottom: 24 }}>
-        <p style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500, marginBottom: 4 }}>{getGreeting()}</p>
-        <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 500, color: "var(--text-strong)", lineHeight: 1.2 }}>Today's Menu</h1>
+        <p style={{ fontSize: 16, color: "var(--text-muted)", fontWeight: 500, marginBottom: 4 }}>{getGreeting()}</p>
+        <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 500, color: "var(--text-strong)", lineHeight: 1.2 }}>
+          What would you like to have today?
+        </h1>
       </div>
 
       {/* Category chips */}

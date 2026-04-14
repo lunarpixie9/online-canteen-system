@@ -10,7 +10,7 @@ const S = {
     borderBottom: "1px solid var(--border)",
   },
   inner: {
-    maxWidth: 520,
+    maxWidth: 980,
     margin: "0 auto",
     padding: "0 16px",
     height: 56,
@@ -36,14 +36,14 @@ const S = {
   logoMarkSvg: { width: 16, height: 16, fill: "#fff" },
   logoText: {
     fontFamily: "Fraunces, serif",
-    fontSize: 15,
-    fontWeight: 500,
+    fontSize: 18,
+    fontWeight: 600,
     color: "var(--text-strong)",
     lineHeight: 1,
   },
   logoSub: {
-    fontSize: 10,
-    color: "var(--text-muted)",
+    fontSize: 9,
+    color: "#5a5a5a",
     lineHeight: 1,
     marginTop: 2,
     fontFamily: "DM Sans, sans-serif",
@@ -73,14 +73,8 @@ export default function Navbar() {
     <header style={S.header}>
       <div style={S.inner}>
         <NavLink to="/" style={S.logo}>
-          <div style={S.logoMark} aria-hidden="true">
-            {/* Simple tray icon */}
-            <svg viewBox="0 0 16 16" style={S.logoMarkSvg}>
-              <path d="M2 10h12v1.5a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 11.5V10zm0-1C2 6.686 4.686 4 8 4s6 2.686 6 5H2z" />
-            </svg>
-          </div>
           <div>
-            <p style={S.logoText}>Edzy Canteen</p>
+            <p style={S.logoText}>Online Canteen</p>
             <p style={S.logoSub}>Admin Dashboard</p>
           </div>
         </NavLink>
