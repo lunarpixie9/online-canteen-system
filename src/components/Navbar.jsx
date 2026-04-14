@@ -1,34 +1,110 @@
 import { NavLink } from "react-router-dom";
 
-const links = [
-  { to: "/", label: "🍽️ Snacks" },
-  { to: "/students", label: "👨‍🎓 Students" },
-];
+const S = {
+  header: {
+    position: "sticky",
+    top: 0,
+    zIndex: 40,
+    background: "rgba(246,243,238,0.92)",
+    backdropFilter: "blur(12px)",
+    borderBottom: "1px solid var(--border)",
+  },
+  inner: {
+    maxWidth: 520,
+    margin: "0 auto",
+    padding: "0 16px",
+    height: 56,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  logo: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    textDecoration: "none",
+  },
+  logoMark: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    background: "var(--amber)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoMarkSvg: { width: 16, height: 16, fill: "#fff" },
+  logoText: {
+    fontFamily: "Fraunces, serif",
+    fontSize: 15,
+    fontWeight: 500,
+    color: "var(--text-strong)",
+    lineHeight: 1,
+  },
+  logoSub: {
+    fontSize: 10,
+    color: "var(--text-muted)",
+    lineHeight: 1,
+    marginTop: 2,
+    fontFamily: "DM Sans, sans-serif",
+  },
+  nav: {
+    display: "flex",
+    alignItems: "center",
+    gap: 2,
+    background: "var(--bg-sunken)",
+    borderRadius: 9999,
+    padding: "3px",
+  },
+};
+
+const activeStyle = {
+  background: "var(--bg-card)",
+  color: "var(--text-strong)",
+  boxShadow: "0 1px 4px rgba(0,0,0,0.10)",
+};
+const inactiveStyle = {
+  background: "transparent",
+  color: "var(--text-muted)",
+};
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-stone-100">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🏫</span>
-          <div>
-            <p className="font-display font-semibold text-stone-800 leading-none">Edzy Canteen</p>
-            <p className="text-[11px] text-stone-400 leading-none mt-0.5">Admin Dashboard</p>
+    <header style={S.header}>
+      <div style={S.inner}>
+        {/* Logo */}
+        <a href="/" style={S.logo}>
+          <div style={S.logoMark}>
+            {/* Simple tray icon */}
+            <svg viewBox="0 0 16 16" style={S.logoMarkSvg}>
+              <path d="M2 10h12v1.5a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 11.5V10zm0-1C2 6.686 4.686 4 8 4s6 2.686 6 5H2z"/>
+            </svg>
           </div>
-        </div>
-        <nav className="flex items-center gap-1">
-          {links.map(({ to, label }) => (
+          <div>
+            <p style={S.logoText}>Edzy Canteen</p>
+            <p style={S.logoSub}>Admin Dashboard</p>
+          </div>
+        </a>
+
+        {/* Nav tabs */}
+        <nav style={S.nav}>
+          {[
+            { to: "/",         label: "Menu" },
+            { to: "/students", label: "Students" },
+          ].map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
               end
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-2xl text-sm font-medium transition-all duration-150 ${
-                  isActive
-                    ? "bg-amber-400 text-stone-900 shadow-sm"
-                    : "text-stone-500 hover:text-stone-800 hover:bg-stone-100"
-                }`
-              }
+              style={({ isActive }) => ({
+                padding: "6px 14px",
+                borderRadius: 9999,
+                fontSize: 13,
+                fontWeight: 500,
+                textDecoration: "none",
+                transition: "all 0.15s",
+                ...(isActive ? activeStyle : inactiveStyle),
+              })}
             >
               {label}
             </NavLink>

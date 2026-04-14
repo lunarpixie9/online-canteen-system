@@ -2,13 +2,6 @@ import { useEffect } from "react";
 
 export default function Modal({ isOpen, onClose, title, children }) {
   useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [isOpen, onClose]);
-
-  useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
@@ -16,31 +9,46 @@ export default function Modal({ isOpen, onClose, title, children }) {
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 modal-backdrop"
-      style={{ backgroundColor: "rgba(28,25,23,0.4)" }}
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
+    <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", flexDirection: "column", justifyContent: "flex-end" }} className="anim-fadeIn">
+      {/* Backdrop */}
       <div
-        className="bg-white rounded-3xl w-full max-w-md shadow-2xl modal-content"
-        onClick={(e) => e.stopPropagation()}
+        onClick={onClose}
+        style={{ position: "absolute", inset: 0, background: "rgba(26,23,20,0.35)", backdropFilter: "blur(2px)" }}
+      />
+      {/* Sheet */}
+      <div
+        className="anim-slideUp"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          background: "var(--bg-card)",
+          borderRadius: "24px 24px 0 0",
+          boxShadow: "var(--shadow-float)",
+          maxHeight: "88vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
-        <div className="flex items-center justify-between p-6 pb-4">
-          <h2 id="modal-title" className="font-display text-xl font-semibold text-stone-800">
+        {/* Handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px" }}>
+          <div style={{ width: 36, height: 4, borderRadius: 9999, background: "var(--border)" }} />
+        </div>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px 16px", borderBottom: "1px solid var(--border)" }}>
+          <h2 style={{ fontFamily: "Fraunces, serif", fontSize: 17, fontWeight: 500, color: "var(--text-strong)" }}>
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-all"
-            aria-label="Close modal"
+            style={{ width: 30, height: 30, borderRadius: 9999, background: "var(--bg-sunken)", border: "none", cursor: "pointer", color: "var(--text-muted)", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             ✕
           </button>
         </div>
-        <div className="px-6 pb-6">{children}</div>
+        {/* Body */}
+        <div style={{ padding: "20px", overflowY: "auto" }}>
+          {children}
+        </div>
       </div>
     </div>
   );

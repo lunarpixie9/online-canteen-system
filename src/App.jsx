@@ -6,18 +6,20 @@ import StudentsPage from "./pages/StudentsPage";
 import StudentDetailPage from "./pages/StudentDetailPage";
 
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { staleTime: 0, retry: 1 },
-  },
+  defaultOptions: { queries: { staleTime: 0, retry: 1 } },
 });
 
 function NotFoundPage() {
   return (
-    <div className="page-container text-center py-24">
-      <p className="text-5xl mb-4">🍽️</p>
-      <h1 className="font-display text-3xl font-semibold text-stone-800 mb-2">Page Not Found</h1>
-      <p className="text-stone-400 mb-6">Looks like this page went off the menu.</p>
-      <a href="/" className="btn-primary inline-block">Back to Menu</a>
+    <div className="page-container" style={{ textAlign: "center", paddingTop: 80 }}>
+      <p style={{ fontSize: 40, marginBottom: 12 }}>404</p>
+      <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 24, marginBottom: 8 }}>
+        Page not found
+      </h1>
+      <p style={{ color: "var(--text-muted)", marginBottom: 24, fontSize: 14 }}>
+        Looks like this page went off the menu.
+      </p>
+      <a href="/" className="btn-primary">Back to Menu</a>
     </div>
   );
 }
@@ -26,18 +28,16 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className="min-h-screen bg-[#FAF8F4]">
-          <Navbar />
-          <main>
-            <Routes>
-              <Route path="/" element={<SnacksPage />} />
-              <Route path="/students" element={<StudentsPage />} />
-              <Route path="/students/:id" element={<StudentDetailPage />} />
-              <Route path="/404" element={<NotFoundPage />} />
-              <Route path="*" element={<Navigate to="/404" replace />} />
-            </Routes>
-          </main>
-        </div>
+        <Navbar />
+        <main>
+          <Routes>
+            <Route path="/"            element={<SnacksPage />} />
+            <Route path="/students"    element={<StudentsPage />} />
+            <Route path="/students/:id" element={<StudentDetailPage />} />
+            <Route path="/404"         element={<NotFoundPage />} />
+            <Route path="*"            element={<Navigate to="/404" replace />} />
+          </Routes>
+        </main>
       </BrowserRouter>
     </QueryClientProvider>
   );
