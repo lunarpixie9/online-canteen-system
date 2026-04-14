@@ -82,7 +82,7 @@ function TabsBar() {
 
   return (
     <div style={{ background: "rgba(246,243,238,0.92)", backdropFilter: "blur(12px)" }}>
-      <div style={{ maxWidth: 980, margin: "0 auto", padding: "8px 16px 14px" }}>
+      <div style={{ maxWidth: 980, margin: "0 auto", padding: "30px 16px 22px" }}>
         <nav style={{ display: "flex", justifyContent: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 2, background: "var(--bg-sunken)", borderRadius: 9999, padding: 3 }}>
             {tabs.map(({ to, label }) => (
