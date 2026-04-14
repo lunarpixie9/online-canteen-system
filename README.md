@@ -1,73 +1,82 @@
-# Online Canteen System (Prototype)
-
-A small React prototype for a school canteen ordering flow.
-
-## Features (matches assignment checklist)
-
-- **Snacks**: view snacks (name, price, ordersCount) and place an order
-- **Students (admin)**: list students, create students, and view student details
-- **Orders**: view all orders + status (**pending → ready → completed**)
-- **Purchases**: filter purchases by **year / month / date** and see what was bought
-
-## Mode (Student vs Admin)
-
-This prototype supports two front-end modes:
-
-- **Student mode (default)**: cannot access student directory routes
-- **Admin mode**: can access `/students` and `/students/:id`
-
-### Switch modes
-
-- Use the **Mode** toggle in the top navbar, or
-- Add a URL query param:
-  - `/?mode=admin`
-  - `/?mode=student`
-
-Mode is persisted in `localStorage`.
-
-## Routes
-
-- `/` — Menu (Snacks page)
-- `/orders` — Orders list + statuses
-- `/spending` — Purchases tracking (year/month/date filters)
-- `/students` — Students list (**admin-only**)
-- `/students/:id` — Student detail (**admin-only**)
-
-## Mock API integration
-
-The app uses a small Promise-based mock API layer:
-
-- `src/api/mockApi.js`
-- Queries are handled with React Query in `src/hooks/useApi.js`
-
-Mock endpoints represented:
-
-- `GET /snacks`
-- `GET /students`
-- `GET /students/:id`
-- `POST /students`
-- `POST /orders`
-
-## Run locally
-
+# Online Canteen – School Canteen Admin + Student Dashboard
+ 
+A clean, minimal React-based admin dashboard for managing a school canteen. Built as a frontend screening task for **Edzy by Paraheights Technologies**.
+ 
+ **Live Demo:** https://online-canteen-system.vercel.app/
+ **Repository:** https://github.com/lunarpixie9/online-canteen-system
+ 
+---
+ 
+## Features
+ 
+- **Snacks Page** — Browse all canteen items with name, price, category, and order count. Place an order via a modal.
+- **Students Page** — View all registered students, search by name or referral code, add new students.
+- **Student Detail Page** — See a student's profile, total spending, total orders, and full order history. Place new orders directly.
+- **Order Form** — Reusable component used in both Snacks and Student Detail pages. Shows a live running total as quantity changes.
+- **Persistent Orders** — Orders saved to localStorage and survive page refreshes.
+- **Loading & Error States** — Skeleton loaders on every page, meaningful error messages throughout.
+- **Responsive Design** — Works on desktop, tablet, and mobile.
+ 
+---
+ 
+##  Libraries Used
+ 
+| Library | Purpose |
+|---|---|
+| React 19 + Vite | UI framework and build tool |
+| React Router DOM v6 | Client-side routing |
+| Zustand | Global state management |
+| TanStack React Query | Async data fetching with loading/error states |
+| React Hook Form + Zod | Form handling and schema-based validation |
+| Tailwind CSS v3 | Utility-first styling and responsive design |
+ 
+---
+ 
+##  Setup Instructions
+ 
+### Prerequisites
+- Node.js v18 or higher
+- npm v9 or higher
+ 
+### Run Locally
+ 
 ```bash
+git clone https://github.com/lunarpixie9/online-canteen-system.git
+cd online-canteen-system
 npm install
 npm run dev
 ```
-
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+ 
+Open http://localhost:5173 in your browser.
+ 
+---
+ 
+##  Mock Data Approach
+ 
+No backend is used. All data lives in `src/data/mockData.js` — 15 snacks, 5 students, 24 seed orders.
+ 
+The Zustand store (`src/store/useStore.js`) acts as the in-memory database with `addStudent` and `placeOrder` actions. TanStack React Query wraps store reads with simulated async delays (300–600ms) to demonstrate realistic loading states. Orders are persisted to localStorage under the key `edzy_orders`.
+ 
+When an order is placed: the order is added, the snack ordersCount increments, the student totalSpent updates, localStorage syncs, and React Query invalidates relevant queries so the UI updates instantly.
+ 
+---
+ 
+## 📁 Project Structure
+ 
+```
+src/
+├── components/       # Modal, Navbar, OrderForm, SnackCard, StudentListItem
+├── data/             # mockData.js — seed snacks, students, orders
+├── hooks/            # useApi.js — React Query hooks
+├── pages/            # SnacksPage, StudentsPage, StudentDetailPage
+├── store/            # useStore.js — Zustand store + localStorage
+├── App.jsx           # Router + QueryClient provider
+└── index.css         # Global styles + Tailwind custom classes
+```
+ 
+---
+ 
+## 🔒 Security Notes
+ 
+All inputs validated with Zod. localStorage reads wrapped in try/catch. In production, this dashboard would require authentication and role-based access control.
+ 
